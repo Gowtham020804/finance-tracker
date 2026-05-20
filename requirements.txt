@@ -1,0 +1,15 @@
+streamlit
+pandas
+openpyxl
+numpy
+plotly
+matplotlib
+scikit-learn
+pymongo
+bcrypt
+pyjwt
+python-dotenv
+streamlit-option-menu
+email-validator
+fastapi
+uvicorn
