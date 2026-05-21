@@ -1,19 +1,9 @@
 import streamlit as st
-import bcrypt
-import jwt
-import datetime
+import requests
+from pathlib import Path
 
-SECRET_KEY = "finance_secret"
-
-users = {}
-
-
-def generate_token(username):
-    payload = {
-        "user": username,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    }
-    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+# Backend API base URL — override via Streamlit secrets if present
+API_URL = st.secrets.get("API_URL", "http://localhost:8000")
 
 
 def signup_user():
@@ -23,9 +13,24 @@ def signup_user():
     password = st.text_input("Password", type="password")
 
     if st.button("Create Account"):
-        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-        users[username] = hashed
-        st.success("Account Created Successfully")
+        try:
+            resp = requests.post(
+                f"{API_URL}/signup",
+                json={"username": username, "password": password},
+                timeout=5,
+            )
+        except Exception as e:
+            st.error(f"Failed to reach backend: {e}")
+            return
+
+        if resp.status_code == 200:
+            st.success("Account Created Successfully")
+        else:
+            try:
+                detail = resp.json().get("detail", resp.text)
+            except Exception:
+                detail = resp.text
+            st.error(f"Signup failed: {detail}")
 
 
 def login_user():
@@ -35,14 +40,35 @@ def login_user():
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if username in users:
-            if bcrypt.checkpw(password.encode(), users[username]):
-                token = generate_token(username)
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.session_state.token = token
-                st.success("Login Successful")
-            else:
-                st.error("Invalid Password")
+        try:
+            resp = requests.post(
+                f"{API_URL}/login",
+                json={"username": username, "password": password},
+                timeout=5,
+            )
+        except Exception as e:
+            st.error(f"Failed to reach backend: {e}")
+            return
+
+        if resp.status_code == 200:
+            data = resp.json()
+            token = data.get("token")
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.session_state.token = token
+            st.success("Login Successful")
         else:
-            st.error("User Not Found")
+            try:
+                detail = resp.json().get("detail", resp.text)
+            except Exception:
+                detail = resp.text
+            st.error(f"Login failed: {detail}")
+
+    st.markdown("---")
+    st.markdown("### Or sign in with Google")
+    google_url = f"{API_URL}/auth/google/login"
+    st.markdown(
+        f'<a href="{google_url}" target="_blank"><button style="background-color:#4285F4;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;">Sign in with Google</button></a>',
+        unsafe_allow_html=True,
+    )
+    st.caption("A new browser tab will open for Google sign-in. After login, return here.")
