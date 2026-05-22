@@ -1,20 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 router = APIRouter()
 
 
-# -----------------------------
-# Request Models
-# -----------------------------
 class UserAuth(BaseModel):
     username: str
     password: str
 
 
-# -----------------------------
-# Signup Route
-# -----------------------------
 @router.post("/signup")
 def signup(user: UserAuth):
     return {
@@ -22,9 +16,6 @@ def signup(user: UserAuth):
     }
 
 
-# -----------------------------
-# Login Route
-# -----------------------------
 @router.post("/login")
 def login(user: UserAuth):
     return {
@@ -33,14 +24,22 @@ def login(user: UserAuth):
     }
 
 
-# -----------------------------
-# Google Auth Routes
-# -----------------------------
+@router.get("/")
+def home():
+    return {
+        "message": "Backend working"
+    }
+
+
 @router.get("/auth/google")
 def google_auth():
-    return {"message": "Google auth route working"}
+    return {
+        "message": "Google auth route working"
+    }
 
 
 @router.get("/auth/google/callback")
 def google_callback():
-    return {"message": "Google callback working"}
+    return {
+        "message": "Google callback working"
+    }
