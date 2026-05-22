@@ -1,52 +1,39 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 router = APIRouter()
 
-users_db = {}
 
-
-class User(BaseModel):
+class UserAuth(BaseModel):
     username: str
     password: str
 
 
 @router.get("/")
 def home():
-    return {"message": "Backend working"}
+    return {"message": "Financial Expense Tracker API Running"}
 
 
 @router.post("/signup")
-def signup(user: User):
-
-    if user.username in users_db:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    users_db[user.username] = user.password
-
-    return {"message": "Signup successful"}
+def signup(user: UserAuth):
+    return {
+        "message": "Signup successful",
+        "username": user.username
+    }
 
 
 @router.post("/login")
-def login(user: User):
-
-    saved_password = users_db.get(user.username)
-
-    if not saved_password:
-        raise HTTPException(status_code=401, detail="User not found")
-
-    if saved_password != user.password:
-        raise HTTPException(status_code=401, detail="Wrong password")
-
+def login(user: UserAuth):
     return {
         "message": "Login successful",
-        "token": "demo_token"
+        "token": "dummy_token",
+        "username": user.username
     }
 
 
 @router.get("/auth/google")
 def google_auth():
-    return {"message": "Google auth working"}
+    return {"message": "Google auth route working"}
 
 
 @router.get("/auth/google/callback")
