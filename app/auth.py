@@ -1,7 +1,8 @@
 import streamlit as st
 import requests
 
-# Your Render backend URL
+# IMPORTANT:
+# NEVER use localhost in deployed apps
 API_URL = "https://finance-tracker-mv0i.onrender.com"
 
 
@@ -13,19 +14,22 @@ def signup_user():
 
     if st.button("Create Account"):
         try:
-            resp = requests.post(
+            response = requests.post(
                 f"{API_URL}/signup",
-                json={"username": username, "password": password},
-                timeout=15,
+                json={
+                    "username": username,
+                    "password": password
+                },
+                timeout=20
             )
 
-            if resp.status_code == 200:
+            if response.status_code == 200:
                 st.success("Account Created Successfully")
             else:
-                st.error(f"Signup failed: {resp.text}")
+                st.error(f"Signup failed: {response.text}")
 
         except Exception as e:
-            st.error(f"Failed to reach backend: {e}")
+            st.error(f"Backend connection failed: {e}")
 
 
 def login_user():
@@ -36,45 +40,50 @@ def login_user():
 
     if st.button("Login"):
         try:
-            resp = requests.post(
+            response = requests.post(
                 f"{API_URL}/login",
-                json={"username": username, "password": password},
-                timeout=15,
+                json={
+                    "username": username,
+                    "password": password
+                },
+                timeout=20
             )
 
-            if resp.status_code == 200:
-                data = resp.json()
+            if response.status_code == 200:
+                data = response.json()
 
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.session_state.token = data.get("token")
 
                 st.success("Login Successful")
+                st.rerun()
 
             else:
-                st.error(f"Login failed: {resp.text}")
+                st.error(f"Login failed: {response.text}")
 
         except Exception as e:
-            st.error(f"Failed to reach backend: {e}")
+            st.error(f"Backend connection failed: {e}")
 
     st.markdown("---")
-    st.markdown("### Or sign in with Google")
+    st.subheader("Google Login")
 
-    google_url = f"{API_URL}/auth/google/login"
+    google_login_url = f"{API_URL}/auth/google/login"
 
     st.markdown(
         f"""
-        <a href="{google_url}" target="_self">
+        <a href="{google_login_url}" target="_self">
             <button style="
                 background-color:#4285F4;
                 color:white;
                 border:none;
                 padding:10px 20px;
-                border-radius:6px;
-                cursor:pointer;">
+                border-radius:8px;
+                cursor:pointer;
+                font-size:16px;">
                 Sign in with Google
             </button>
         </a>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
