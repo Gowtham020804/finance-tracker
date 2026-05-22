@@ -1,24 +1,53 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from authlib.integrations.starlette_client import OAuth
 from pydantic import BaseModel
 from passlib.context import CryptContext
-from authlib.integrations.starlette_client import OAuth
+import sqlite3
 import os
 
 router = APIRouter()
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# =========================
+# PASSWORD HASHING
+# =========================
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 
-# Dummy user storage
-users_db = {}
+# =========================
+# DATABASE
+# =========================
+DATABASE = "local_dev.db"
 
 
-# -------------------------
-# Request Models
-# -------------------------
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-class UserSignup(BaseModel):
+
+# =========================
+# CREATE TABLE
+# =========================
+conn = get_db_connection()
+
+conn.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT
+)
+""")
+
+conn.commit()
+conn.close()
+
+# =========================
+# Pydantic Models
+# =========================
+class UserCreate(BaseModel):
     username: str
     password: str
 
@@ -28,40 +57,70 @@ class UserLogin(BaseModel):
     password: str
 
 
-# -------------------------
-# Signup Route
-# -------------------------
-
+# =========================
+# SIGNUP ROUTE
+# =========================
 @router.post("/signup")
-async def signup(user: UserSignup):
+def signup(user: UserCreate):
 
-    if user.username in users_db:
-        raise HTTPException(status_code=400, detail="User already exists")
+    conn = get_db_connection()
+
+    existing_user = conn.execute(
+        "SELECT * FROM users WHERE username=?",
+        (user.username,)
+    ).fetchone()
+
+    if existing_user:
+        conn.close()
+        raise HTTPException(
+            status_code=400,
+            detail="User already exists"
+        )
 
     hashed_password = pwd_context.hash(user.password)
 
-    users_db[user.username] = {
-        "username": user.username,
-        "password": hashed_password
+    conn.execute(
+        "INSERT INTO users (username, password) VALUES (?, ?)",
+        (user.username, hashed_password)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "message": "Signup successful"
     }
 
-    return {"message": "Signup successful"}
 
-
-# -------------------------
-# Login Route
-# -------------------------
-
+# =========================
+# LOGIN ROUTE
+# =========================
 @router.post("/login")
-async def login(user: UserLogin):
+def login(user: UserLogin):
 
-    db_user = users_db.get(user.username)
+    conn = get_db_connection()
+
+    db_user = conn.execute(
+        "SELECT * FROM users WHERE username=?",
+        (user.username,)
+    ).fetchone()
+
+    conn.close()
 
     if not db_user:
-        raise HTTPException(status_code=401, detail="Invalid username")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username"
+        )
 
-    if not pwd_context.verify(user.password, db_user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid password")
+    if not pwd_context.verify(
+        user.password,
+        db_user["password"]
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid password"
+        )
 
     return {
         "message": "Login successful",
@@ -69,10 +128,9 @@ async def login(user: UserLogin):
     }
 
 
-# -------------------------
-# Google OAuth Setup
-# -------------------------
-
+# =========================
+# GOOGLE OAUTH
+# =========================
 oauth = OAuth()
 
 oauth.register(
@@ -85,12 +143,10 @@ oauth.register(
     }
 )
 
-
-# -------------------------
-# Google Login Route
-# -------------------------
-
-@router.get("/auth/google")
+# =========================
+# GOOGLE LOGIN ROUTE
+# =========================
+@router.get("/auth/google/login")
 async def google_login(request: Request):
 
     redirect_uri = "https://finance-tracker-mv0i.onrender.com/auth/google/callback"
@@ -101,10 +157,9 @@ async def google_login(request: Request):
     )
 
 
-# -------------------------
-# Google Callback Route
-# -------------------------
-
+# =========================
+# GOOGLE CALLBACK ROUTE
+# =========================
 @router.get("/auth/google/callback")
 async def google_callback(request: Request):
 
@@ -112,12 +167,11 @@ async def google_callback(request: Request):
 
     user_info = token.get("userinfo")
 
-    if user_info:
-        email = user_info.get("email")
+    email = user_info.get("email")
 
-        return {
-            "message": "Google login successful",
-            "email": email
-        }
+    print("Google Login Success:", email)
 
-    raise HTTPException(status_code=400, detail="Google login failed")
+    # REDIRECT TO STREAMLIT APP
+    return RedirectResponse(
+        url="https://finance-expense-tracker.streamlit.app"
+    )
