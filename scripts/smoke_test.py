@@ -1,7 +1,7 @@
 import requests
 import time
 
-API = "http://127.0.0.1:8000"
+API = "http://https://finance-tracker-mv0i.onrender.com"
 
 # give server a bit to start
 time.sleep(1)
