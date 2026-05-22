@@ -1,12 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from passlib.context import CryptContext
 
 router = APIRouter()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Fake in-memory DB for now
 users_db = {}
 
 
@@ -17,33 +13,30 @@ class User(BaseModel):
 
 @router.get("/")
 def home():
-    return {"message": "Backend is running"}
+    return {"message": "Backend working"}
 
 
 @router.post("/signup")
 def signup(user: User):
+
     if user.username in users_db:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    hashed_password = pwd_context.hash(user.password)
+    users_db[user.username] = user.password
 
-    users_db[user.username] = {
-        "username": user.username,
-        "password": hashed_password,
-    }
-
-    return {"message": "Account created successfully"}
+    return {"message": "Signup successful"}
 
 
 @router.post("/login")
 def login(user: User):
-    db_user = users_db.get(user.username)
 
-    if not db_user:
-        raise HTTPException(status_code=401, detail="Invalid username")
+    saved_password = users_db.get(user.username)
 
-    if not pwd_context.verify(user.password, db_user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid password")
+    if not saved_password:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    if saved_password != user.password:
+        raise HTTPException(status_code=401, detail="Wrong password")
 
     return {
         "message": "Login successful",
@@ -52,8 +45,8 @@ def login(user: User):
 
 
 @router.get("/auth/google")
-def google_login():
-    return {"message": "Google login route working"}
+def google_auth():
+    return {"message": "Google auth working"}
 
 
 @router.get("/auth/google/callback")
