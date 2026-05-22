@@ -66,9 +66,13 @@ def login_user():
 
     st.markdown("---")
     st.markdown("### Or sign in with Google")
-    google_url = f"{API_URL}/auth/google/login"
+
+    # FIXED GOOGLE ROUTE
+    google_url = f"{API_URL}/auth/google"
+
     st.markdown(
         f'<a href="{google_url}" target="_blank"><button style="background-color:#4285F4;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;">Sign in with Google</button></a>',
         unsafe_allow_html=True,
     )
+
     st.caption("A new browser tab will open for Google sign-in. After login, return here.")
