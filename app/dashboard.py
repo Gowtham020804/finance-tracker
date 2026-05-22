@@ -12,7 +12,7 @@ from app.smtp_service import (
 )
 
 # Backend API base URL — override via Streamlit secrets if present
-API_URL = st.secrets.get("API_URL", "http://localhost:8000")
+API_URL = st.secrets.get("API_URL", "https://finance-tracker-mv0i.onrender.com")
 
 
 def dashboard_page():
