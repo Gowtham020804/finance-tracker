@@ -1,0 +1,17 @@
+streamlit
+fastapi
+uvicorn
+sqlalchemy
+python-dotenv
+authlib
+bcrypt
+PyJWT
+psycopg2-binary
+httpx
+itsdangerous
+pandas
+plotly
+requests
+numpy
+python-multipart
+email-validator

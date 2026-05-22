@@ -1,0 +1,263 @@
+/* ============================= */
+/* GLOBAL BACKGROUND */
+/* ============================= */
+
+body,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] > div,
+[data-testid="stAppViewContainer"] > div > section,
+[data-testid="stAppViewContainer"] > div > section > div {
+    background: linear-gradient(
+        135deg,
+        #0f0c29,
+        #302b63,
+        #24243e,
+        #1f1c2c
+    ) !important;
+    background-size: 400% 400% !important;
+    animation: gradientBG 15s ease infinite !important;
+    color: white !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
+main,
+section[data-testid="stAppViewContainer"] {
+    background: transparent !important;
+}
+
+/* Animated Background */
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ============================= */
+/* SIDEBAR */
+/* ============================= */
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(
+        180deg,
+        #141e30,
+        #243b55,
+        #0f2027
+    );
+    border-right: 2px solid rgba(255,255,255,0.1);
+}
+
+/* ============================= */
+/* TITLES */
+/* ============================= */
+
+h1, h2, h3, .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3 {
+    color: #ffffff !important;
+    text-shadow: 0px 0px 12px rgba(0,255,255,0.8) !important;
+    font-weight: bold !important;
+}
+
+/* ============================= */
+/* CARDS */
+/* ============================= */
+
+[data-testid="metric-container"] {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0px 8px 32px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+
+[data-testid="metric-container"]:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 0px 20px rgba(0,255,255,0.5);
+}
+
+/* ============================= */
+/* BUTTONS */
+/* ============================= */
+
+.stButton > button {
+    background: linear-gradient(
+        45deg,
+        #ff6ec4,
+        #7873f5,
+        #4ADEDE
+    );
+
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: 0.3s;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
+}
+
+.stButton > button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 0px 20px rgba(255,255,255,0.5);
+}
+
+/* ============================= */
+/* INPUT BOXES */
+/* ============================= */
+
+.stTextInput input,
+.stNumberInput input,
+.stSelectbox div {
+    background-color: rgba(255,255,255,0.08) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+/* ============================= */
+/* DATAFRAME */
+/* ============================= */
+
+[data-testid="stDataFrame"] {
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.4);
+}
+
+/* ============================= */
+/* SUCCESS MESSAGE */
+/* ============================= */
+
+.stSuccess {
+    background: linear-gradient(
+        45deg,
+        #00b09b,
+        #96c93d
+    );
+    color: white;
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+/* ============================= */
+/* ERROR MESSAGE */
+/* ============================= */
+
+.stError {
+    background: linear-gradient(
+        45deg,
+        #ff416c,
+        #ff4b2b
+    );
+    color: white;
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+/* ============================= */
+/* INFO BOX */
+/* ============================= */
+
+.stInfo {
+    background: linear-gradient(
+        45deg,
+        #2193b0,
+        #6dd5ed
+    );
+    color: white;
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+/* ============================= */
+/* LOGIN CONTAINER */
+/* ============================= */
+
+.login-box {
+    background: rgba(255,255,255,0.08);
+    padding: 40px;
+    border-radius: 25px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0px 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ============================= */
+/* SCROLLBAR */
+/* ============================= */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e1e2f;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        #ff6ec4,
+        #7873f5
+    );
+    border-radius: 10px;
+}
+
+/* ============================= */
+/* HERO SECTION */
+/* ============================= */
+
+.hero {
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.1),
+        rgba(255,255,255,0.05)
+    );
+
+    padding: 30px;
+    border-radius: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+
+    backdrop-filter: blur(15px);
+
+    box-shadow: 0px 8px 32px rgba(0,0,0,0.3);
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+}
+
+.hero p {
+    color: #dcdcdc;
+    font-size: 18px;
+}
+
+/* ============================= */
+/* ANIMATED GLOW */
+/* ============================= */
+
+.glow {
+    animation: glowEffect 2s infinite alternate;
+}
+
+@keyframes glowEffect {
+    from {
+        text-shadow: 0 0 10px #00ffff;
+    }
+    to {
+        text-shadow: 0 0 25px #ff00ff;
+    }
+}
