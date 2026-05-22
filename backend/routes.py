@@ -1,36 +1,41 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter()
 
 
+# -----------------------------
+# Request Models
+# -----------------------------
 class UserAuth(BaseModel):
     username: str
     password: str
 
 
-@router.get("/")
-def home():
-    return {"message": "Financial Expense Tracker API Running"}
-
-
+# -----------------------------
+# Signup Route
+# -----------------------------
 @router.post("/signup")
 def signup(user: UserAuth):
     return {
-        "message": "Signup successful",
-        "username": user.username
+        "message": f"User {user.username} created successfully"
     }
 
 
+# -----------------------------
+# Login Route
+# -----------------------------
 @router.post("/login")
 def login(user: UserAuth):
     return {
-        "message": "Login successful",
-        "token": "dummy_token",
+        "token": "demo_token",
         "username": user.username
     }
 
 
+# -----------------------------
+# Google Auth Routes
+# -----------------------------
 @router.get("/auth/google")
 def google_auth():
     return {"message": "Google auth route working"}
