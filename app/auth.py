@@ -22,7 +22,7 @@ def signup_user():
     with col1:
         st.markdown("✓ At least 6 characters")
     with col2:
-        st.markdown("✓ Maximum 72 characters")
+        st.markdown("✓ Use a strong password")
 
     if st.button("Create Account"):
         
@@ -34,9 +34,8 @@ def signup_user():
             st.error("Password must be at least 6 characters")
             return
         
-        if len(password) > 72:
-            st.error("⚠️ Password is too long (max 72 characters). Please shorten it.")
-            return
+        # Backend supports long passwords (pre-hashed and pbkdf2_sha256 used)
+        # Encourage strong passwords but don't enforce an upper length here.
 
         try:
 
