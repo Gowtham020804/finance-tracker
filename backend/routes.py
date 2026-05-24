@@ -29,7 +29,7 @@ def get_db_connection():
 
 
 # =========================
-# CREATE TABLE
+# CREATE USERS TABLE
 # =========================
 conn = get_db_connection()
 
@@ -144,18 +144,22 @@ oauth.register(
 )
 
 # =========================
+# STREAMLIT FRONTEND URL
+# =========================
+FRONTEND_URL = "https://finance-tracker-nsh5huggmvarbbzappy2w.streamlit.app"
+
+# =========================
 # GOOGLE LOGIN ROUTE
 # =========================
 @router.get("/auth/google/login")
 async def google_login(request: Request):
 
-    redirect_uri = "https://finance-tracker-mv0i.onrender.com/auth/google/callback"
+    redirect_uri = request.url_for("google_callback")
 
     return await oauth.google.authorize_redirect(
         request,
         redirect_uri
     )
-
 
 # =========================
 # GOOGLE CALLBACK ROUTE
@@ -165,13 +169,13 @@ async def google_callback(request: Request):
 
     token = await oauth.google.authorize_access_token(request)
 
-    user_info = token.get("userinfo")
+    user = token.get("userinfo")
 
-    email = user_info.get("email")
+    email = user.get("email")
 
     print("Google Login Success:", email)
 
     # REDIRECT TO STREAMLIT APP
     return RedirectResponse(
-        url="https://finance-expense-tracker.streamlit.app"
+        url=f"{FRONTEND_URL}/?logged_in=true&username={email}"
     )
