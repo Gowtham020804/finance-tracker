@@ -16,6 +16,13 @@ def signup_user():
 
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+    
+    st.caption("Password requirements:")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("✓ At least 6 characters")
+    with col2:
+        st.markdown("✓ Maximum 72 characters")
 
     if st.button("Create Account"):
         
@@ -25,6 +32,10 @@ def signup_user():
             
         if not password or len(password) < 6:
             st.error("Password must be at least 6 characters")
+            return
+        
+        if len(password) > 72:
+            st.error("⚠️ Password is too long (max 72 characters). Please shorten it.")
             return
 
         try:

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 import sqlite3
 import os
+import hashlib
 
 router = APIRouter()
 
@@ -15,6 +16,10 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
+
+def hash_password_sha256(password: str) -> str:
+    """Pre-hash password with SHA256 before bcrypt to handle long passwords"""
+    return hashlib.sha256(password.encode()).hexdigest()
 
 # =========================
 # DATABASE
@@ -91,7 +96,9 @@ def signup(user: UserCreate):
         )
 
     try:
-        hashed_password = pwd_context.hash(user.password)
+        # Pre-hash password with SHA256 before bcrypt to avoid 72-byte limit
+        sha256_password = hash_password_sha256(user.password)
+        hashed_password = pwd_context.hash(sha256_password)
 
         conn.execute(
             "INSERT INTO users (username, password) VALUES (?, ?)",
@@ -134,7 +141,7 @@ def login(user: UserLogin):
         )
 
     if not pwd_context.verify(
-        user.password,
+        hash_password_sha256(user.password),
         db_user["password"]
     ):
         raise HTTPException(
