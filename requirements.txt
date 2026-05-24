@@ -13,3 +13,4 @@ requests
 streamlit
 plotly
 pandas
+scikit-learn
