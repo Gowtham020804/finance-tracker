@@ -1,8 +1,7 @@
 import streamlit as st
 import requests
-from pathlib import Path
 
-# Backend API base URL — override via Streamlit secrets if present
+# Backend API URL
 API_URL = "https://finance-tracker-mv0i.onrender.com"
 
 
@@ -13,66 +12,96 @@ def signup_user():
     password = st.text_input("Password", type="password")
 
     if st.button("Create Account"):
+
         try:
             resp = requests.post(
                 f"{API_URL}/signup",
-                json={"username": username, "password": password},
-                timeout=5,
+                json={
+                    "username": username,
+                    "password": password
+                },
+                timeout=10
             )
-        except Exception as e:
-            st.error(f"Failed to reach backend: {e}")
-            return
 
-        if resp.status_code == 200:
-            st.success("Account Created Successfully")
-        else:
-            try:
-                detail = resp.json().get("detail", resp.text)
-            except Exception:
-                detail = resp.text
-            st.error(f"Signup failed: {detail}")
+            if resp.status_code == 200:
+                st.success("Account Created Successfully")
+
+            else:
+                try:
+                    detail = resp.json().get("detail")
+                except:
+                    detail = resp.text
+
+                st.error(f"Signup failed: {detail}")
+
+        except Exception as e:
+            st.error(f"Backend Error: {e}")
 
 
 def login_user():
+
     st.title("Login")
 
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
+
         try:
             resp = requests.post(
                 f"{API_URL}/login",
-                json={"username": username, "password": password},
-                timeout=5,
+                json={
+                    "username": username,
+                    "password": password
+                },
+                timeout=10
             )
-        except Exception as e:
-            st.error(f"Failed to reach backend: {e}")
-            return
 
-        if resp.status_code == 200:
-            data = resp.json()
-            token = data.get("token")
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.session_state.token = token
-            st.success("Login Successful")
-        else:
-            try:
-                detail = resp.json().get("detail", resp.text)
-            except Exception:
-                detail = resp.text
-            st.error(f"Login failed: {detail}")
+            if resp.status_code == 200:
+
+                data = resp.json()
+
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.session_state.token = data.get("token")
+
+                st.success("Login Successful")
+                st.rerun()
+
+            else:
+                try:
+                    detail = resp.json().get("detail")
+                except:
+                    detail = resp.text
+
+                st.error(f"Login failed: {detail}")
+
+        except Exception as e:
+            st.error(f"Backend Error: {e}")
 
     st.markdown("---")
-    st.markdown("### Or sign in with Google")
+    st.markdown("## Or Sign in with Google")
 
-    # FIXED GOOGLE ROUTE
-    google_url = f"{API_URL}/auth/google"
+    # CORRECT GOOGLE LOGIN ROUTE
+    google_url = f"{API_URL}/auth/google/login"
 
     st.markdown(
-        f'<a href="{google_url}" target="_blank"><button style="background-color:#4285F4;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;">Sign in with Google</button></a>',
+        f"""
+        <a href="{google_url}" target="_self">
+            <button style="
+                background-color:#4285F4;
+                color:white;
+                border:none;
+                padding:10px 20px;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:16px;
+            ">
+                Sign in with Google
+            </button>
+        </a>
+        """,
         unsafe_allow_html=True,
     )
 
-    st.caption("A new browser tab will open for Google sign-in. After login, return here.")
+    st.caption("Click the button to continue with Google authentication.")
