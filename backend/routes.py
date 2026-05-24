@@ -63,6 +63,19 @@ class UserLogin(BaseModel):
 @router.post("/signup")
 def signup(user: UserCreate):
 
+    # Validate input
+    if not user.username or not user.username.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Username cannot be empty"
+        )
+
+    if not user.password or len(user.password) < 6:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 6 characters"
+        )
+
     conn = get_db_connection()
 
     existing_user = conn.execute(
@@ -77,19 +90,26 @@ def signup(user: UserCreate):
             detail="User already exists"
         )
 
-    hashed_password = pwd_context.hash(user.password)
+    try:
+        hashed_password = pwd_context.hash(user.password)
 
-    conn.execute(
-        "INSERT INTO users (username, password) VALUES (?, ?)",
-        (user.username, hashed_password)
-    )
+        conn.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            (user.username, hashed_password)
+        )
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
-    return {
-        "message": "Signup successful"
-    }
+        return {
+            "message": "Signup successful"
+        }
+    except Exception as e:
+        conn.close()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Signup failed: {str(e)}"
+        )
 
 
 # =========================
@@ -133,6 +153,9 @@ def login(user: UserLogin):
 # =========================
 oauth = OAuth()
 
+BACKEND_URL = os.getenv("BACKEND_URL", "https://finance-tracker-mv0i.onrender.com")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://finance-tracker-nsh5huggmvarbbzappy2w.streamlit.app")
+
 oauth.register(
     name="google",
     client_id=os.getenv("GOOGLE_CLIENT_ID"),
@@ -140,13 +163,9 @@ oauth.register(
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
     client_kwargs={
         "scope": "openid email profile"
-    }
+    },
+    redirect_uri=f"{BACKEND_URL}/auth/google/callback"
 )
-
-# =========================
-# STREAMLIT FRONTEND URL
-# =========================
-FRONTEND_URL = "https://finance-tracker-nsh5huggmvarbbzappy2w.streamlit.app"
 
 # =========================
 # GOOGLE LOGIN ROUTE
@@ -154,7 +173,7 @@ FRONTEND_URL = "https://finance-tracker-nsh5huggmvarbbzappy2w.streamlit.app"
 @router.get("/auth/google/login")
 async def google_login(request: Request):
 
-    redirect_uri = request.url_for("google_callback")
+    redirect_uri = f"{BACKEND_URL}/auth/google/callback"
 
     return await oauth.google.authorize_redirect(
         request,
@@ -167,15 +186,17 @@ async def google_login(request: Request):
 @router.get("/auth/google/callback")
 async def google_callback(request: Request):
 
-    token = await oauth.google.authorize_access_token(request)
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user = token.get("userinfo")
+        email = user.get("email")
 
-    user = token.get("userinfo")
+        print("Google Login Success:", email)
 
-    email = user.get("email")
-
-    print("Google Login Success:", email)
-
-    # REDIRECT TO STREAMLIT APP
-    return RedirectResponse(
-        url=f"{FRONTEND_URL}/?logged_in=true&username={email}"
-    )
+        # Redirect to Streamlit with auth params
+        return RedirectResponse(
+            url=f"{FRONTEND_URL}/?auth_token=google_{email}&username={email}"
+        )
+    except Exception as e:
+        print("Google OAuth Error:", e)
+        return RedirectResponse(url=f"{FRONTEND_URL}/?error=oauth_failed")

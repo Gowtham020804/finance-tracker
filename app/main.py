@@ -22,10 +22,19 @@ st.set_page_config(
 # =========================
 params = st.query_params
 
-if params.get("logged_in") == "true":
+# Handle Google OAuth callback
+if params.get("auth_token"):
+    token = params.get("auth_token")[0] if isinstance(params.get("auth_token"), list) else params.get("auth_token")
+    username = params.get("username")[0] if isinstance(params.get("username"), list) else params.get("username")
+    
+    if token and username:
+        st.session_state.logged_in = True
+        st.session_state.username = username
+        st.session_state.token = token
 
+# Handle old format for backward compatibility
+elif params.get("logged_in") == "true":
     st.session_state.logged_in = True
-
     st.session_state.username = params.get("username")
 
 # =========================
