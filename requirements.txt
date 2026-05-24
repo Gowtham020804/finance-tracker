@@ -11,3 +11,5 @@ authlib
 httpx
 requests
 streamlit
+plotly
+pandas
